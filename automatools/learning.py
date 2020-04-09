@@ -55,6 +55,9 @@ def PPTA(sample_words, counts=False, normalise=True):
     ppta.initial_state = states[0]
     ppta.canonical_projection = list(range(len(prefixes)))
     
+    if normalise:
+        ppta.normalise()
+    
     return ppta
 
 
