@@ -97,7 +97,17 @@ class WDFA:
                 shape=(number_of_states, number_of_states)
             )
         
-        return M
+        I = csr_matrix(([1],([0],[0])), shape=(1, number_of_states))
+        
+        T = csr_matrix(
+            (
+                [self.states[i].terminating for i in sorted(self.states)],
+                (list(range(number_of_states)), number_of_states*[0])
+            ),
+            shape=(number_of_states, 1)
+        )
+        
+        return I, M, T
      
         
     def quotient_nodes(self):
