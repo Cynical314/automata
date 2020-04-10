@@ -25,7 +25,7 @@ def PPTA(sample_words, counts=False, normalise=True):
 
     alphabet = get_minumum_alphabet(sample_words)
     prefixes = lexicographic_sort(reaching)
-    ordinals=inverse_dict(prefixes)
+    ordinals = inverse_dict(prefixes)
 
     states = {
         i:State(

@@ -64,26 +64,28 @@ class WDFA:
         
         return state
     
+    
     def generate_transition_matrices(self):
-        
-        number_of_states = max(self.states)
+        #import pdb
+        #pdb.set_trace()
+        number_of_states = max(self.states)+1
         
         row = defaultdict(lambda :[])
         col = defaultdict(lambda :[])
         data = defaultdict(lambda :[])
         
         # default value is a matrix in csr format filled with zeros
-        M = defaultdict(lambda : csr_matrix(([],([],[])),shape=(number_of_states, number_of_states)))
+        M = defaultdict(lambda : csr_matrix(([],([],[])), shape=(number_of_states, number_of_states)))
      
         for idx, current_state in self.states.items():
             
             if not current_state.is_leaf:
                 for input_symbol, (weight, node_index) in current_state.transitions.items():
 
-                    next_state = self.get_state_of_node(node_index)
+                    next_state = self.class_of(node_index)
                         
-                    row[input_symbol].append(current_state.number)
-                    col[input_symbol].append(next_state.number)
+                    row[input_symbol].append(idx)
+                    col[input_symbol].append(next_state)
                     data[input_symbol].append(weight)
         
         
@@ -97,6 +99,37 @@ class WDFA:
         
         return M
      
+        
+    def quotient_nodes(self):
+        
+        state_indices = sorted(self.states)
+
+        for idx, state in self.states.items():
+            for input_symbol, transition in state.transitions.items():
+
+                next_node_index = transition.node_index
+                next_state_index = self.class_of(next_node_index)
+                ordinal_of_next_state = state_indices.index(next_state_index)
+
+                state.transitions[input_symbol] = Transition(
+                    weight=transition.weight,
+                    node_index=ordinal_of_next_state
+                )
+
+            ordinal_of_state = state_indices.index(idx)
+            state.number = ordinal_of_state
+
+
+        self.states = {
+
+            state_indices.index(i): state
+
+            for i, state in self.states.items()
+        }
+
+        self.canonical_projection = list(range(len(self.states)))
+
+        
     def networkx_graph(self):
         
         N = nx.MultiDiGraph()
