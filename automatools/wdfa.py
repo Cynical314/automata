@@ -44,8 +44,9 @@ class WDFA:
     def normalise(self):
         
         for node_index in self.states:
-            
+    
             normalise_state_transitions(self.states[node_index])
+            
     
     def class_of(self, node_index):
         
@@ -66,8 +67,7 @@ class WDFA:
     
     
     def generate_transition_matrices(self):
-        #import pdb
-        #pdb.set_trace()
+        
         number_of_states = max(self.states)+1
         
         row = defaultdict(lambda :[])
@@ -157,7 +157,7 @@ class WDFA:
                         target_state_index, 
                         input_symbol=input_symbol,
                         weight=weight,
-                        label=f'{input_symbol}[{weight}]'
+                        label=f'{input_symbol}[{weight if type(weight)==int else weight:.2f}]'
                     )
                      
         
@@ -197,10 +197,13 @@ def normalise_state_transitions(state):
         summ = state.terminating + sum(weight for input_symbol, (weight, state) in state.transitions.items())
 
         state.terminating = state.terminating / summ
-
+        
         for input_symbol, (weight, next_state) in state.transitions.items():
 
             probability = weight/summ
-            state.transitions[input_symbol] = (probability, next_state)
+            state.transitions[input_symbol] = Transition(
+                weight=probability, 
+                node_index=next_state
+            )
         
         
