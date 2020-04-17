@@ -55,6 +55,33 @@ class WDFA:
         return self.number_of_nodes == self.number_of_states
     
     
+    def delta(self, state, input_symbol):
+        
+        transition = state.transitions[input_symbol]
+        
+        next_state = self.get_state_of_node(transitions.node_index)
+        weight = transition.weight
+        
+        return next_state, weight
+    
+    def get_weight_of(self, word):
+        
+        if word == list() or word == str():
+            
+            return self.initial_state.terminating
+        
+        else:
+            
+            first_symbol = word[0]
+        
+        I, TransitionMats, T = self.generate_transition_matrices()
+        
+        Product = TransitionMats[first_symbol]
+        for symbol in word[1:]:
+            Product *= TransitionMats[symbol]
+        
+        return (I*Product*T).toarray()[0][0]
+    
     def normalise(self):
         
         for node_index in self.states:
