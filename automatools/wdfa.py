@@ -36,10 +36,24 @@ class WDFA:
         
         self.initial_state = initial_state if initial_state is not None else State(number=0)
         self.states = {self.initial_state.number: self.initial_state}
-        self.number_of_states = 1
         self.alphabet = set()
         self.canonical_projection = [0]
 
+    @property
+    def number_of_nodes(self):
+        
+        return len(self.canonical_projection)
+    
+    @property
+    def number_of_states(self):
+        
+        return len(self.states)
+        
+    @property
+    def is_quotiented(self):
+        
+        return self.number_of_nodes == self.number_of_states
+    
     
     def normalise(self):
         
@@ -68,76 +82,86 @@ class WDFA:
     
     def generate_transition_matrices(self):
         
-        number_of_states = max(self.states)+1
-        
+        if self.is_quotiented:
+            
+            number_of_states = self.number_of_states
+            
+        else:
+            
+            number_of_states = max(self.states)+1
+
         row = defaultdict(lambda :[])
         col = defaultdict(lambda :[])
         data = defaultdict(lambda :[])
-        
+
         # default value is a matrix in csr format filled with zeros
         M = defaultdict(lambda : csr_matrix(([],([],[])), shape=(number_of_states, number_of_states)))
-     
+
         for idx, current_state in self.states.items():
-            
+
             if not current_state.is_leaf:
                 for input_symbol, (weight, node_index) in current_state.transitions.items():
 
                     next_state = self.class_of(node_index)
-                        
+
                     row[input_symbol].append(idx)
                     col[input_symbol].append(next_state)
                     data[input_symbol].append(weight)
-        
-        
+
+
         symbols = list(data.keys())
-        
+
         for symbol in symbols:
             M[symbol] = csr_matrix(
                 (data[symbol], (row[symbol], col[symbol])),
                 shape=(number_of_states, number_of_states)
             )
-        
+
         I = csr_matrix(([1],([0],[0])), shape=(1, number_of_states))
-        
+
         T = csr_matrix(
             (
                 [self.states[i].terminating for i in sorted(self.states)],
-                (list(range(number_of_states)), number_of_states*[0])
+                (sorted(self.states), self.number_of_states*[0])
             ),
             shape=(number_of_states, 1)
         )
-        
+
         return I, M, T
-     
-        
+
+    
+    
+    
     def quotient_nodes(self):
         
-        state_indices = sorted(self.states)
+        if not self.is_quotiented:
+        
+            state_indices = sorted(self.states)
 
-        for idx, state in self.states.items():
-            for input_symbol, transition in state.transitions.items():
+            for idx, state in self.states.items():
+                for input_symbol, transition in state.transitions.items():
 
-                next_node_index = transition.node_index
-                next_state_index = self.class_of(next_node_index)
-                ordinal_of_next_state = state_indices.index(next_state_index)
+                    next_node_index = transition.node_index
+                    next_state_index = self.class_of(next_node_index)
+                    ordinal_of_next_state = state_indices.index(next_state_index)
 
-                state.transitions[input_symbol] = Transition(
-                    weight=transition.weight,
-                    node_index=ordinal_of_next_state
-                )
+                    state.transitions[input_symbol] = Transition(
+                        weight=transition.weight,
+                        node_index=ordinal_of_next_state
+                    )
 
-            ordinal_of_state = state_indices.index(idx)
-            state.number = ordinal_of_state
+                ordinal_of_state = state_indices.index(idx)
+                state.number = ordinal_of_state
 
 
-        self.states = {
+            self.states = {
 
-            state_indices.index(i): state
+                state_indices.index(i): state
 
-            for i, state in self.states.items()
-        }
+                for i, state in self.states.items()
+            }
 
-        self.canonical_projection = list(range(len(self.states)))
+            self.canonical_projection = list(range(len(self.states)))
 
         
     def networkx_graph(self):

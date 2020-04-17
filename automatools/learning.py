@@ -176,7 +176,7 @@ def merge(wdfa, state_index1, state_index2):
     del wdfa.states[t]
 
     
-def alergia(sample_words, counts=False, alpha=0.5, normalise=True, quotient=True):
+def alergia(sample_words, counts=False, alpha=0.5, normalise=False, quotient=False):
   
     M = PPTA(
         sample_words=sample_words,
