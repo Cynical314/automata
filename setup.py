@@ -48,7 +48,7 @@ setup(
         'prometheus-client==0.7.1',
         'prompt-toolkit==3.0.5',
         'ptyprocess==0.6.0',
-        'Pygments==2.6.1',
+        'Pygments==2.7.4',
         'pygraphviz==1.5',
         'pyparsing==2.4.6',
         'pyrsistent==0.16.0',
