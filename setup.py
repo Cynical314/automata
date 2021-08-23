@@ -38,7 +38,7 @@ setup(
         'nbconvert==5.6.1',
         'nbformat==5.0.5',
         'networkx==2.4',
-        'notebook==6.0.3',
+        'notebook==6.4.1',
         'numpy==1.18.2',
         'pandas==1.0.3',
         'pandocfilters==1.4.2',
